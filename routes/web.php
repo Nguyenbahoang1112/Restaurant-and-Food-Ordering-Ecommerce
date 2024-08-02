@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Frontend\DashboardController;
+use App\Http\Controllers\Frontend\FrontendController;
+use App\Http\Controllers\Frontend\ProfileController as FrontendProfileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,19 +19,28 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/',[FrontendController::class,'index'])->name('index');
 
-Route::get('/', function () {
-    return view('welcome');
+Route::group(['middleware'=> 'guest'], function () {
+    Route::get('admin/login',[AdminAuthController::class,'index'])->name('admin.login');
+
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::group(['middleware'=>'auth'],function(){
+    Route::get('dashboard',[DashboardController::class,'index'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    //Profile route
+    Route::put('profile',[FrontendProfileController::class,'updateProfile'])->name('profile.update');
+    Route::put('profile/change_password',[FrontendProfileController::class,'updatePassword'])->name('profile.password.update');
+    Route::post('profile/avatar',[FrontendProfileController::class,'updateAvatar'])->name('profile.avatar.update');
+
 });
+
+
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// });
 
 require __DIR__.'/auth.php';
